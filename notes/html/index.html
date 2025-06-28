@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-sticky-note"></i>
+                <span>Notes</span>
+            </div>
+            <div class="header-right">
+                <button id="searchBtn" class="icon-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="addNoteBtn" class="icon-btn">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="closeBtn" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div id="searchBar" class="search-bar hidden">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search notes..." autocomplete="off">
+                <button id="clearSearchBtn" class="clear-search-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Notes List View -->
+            <div id="notesListView" class="view active">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">
+                        <i class="fas fa-list"></i>
+                        All Notes
+                    </button>
+                    <button class="filter-tab" data-filter="recent">
+                        <i class="fas fa-clock"></i>
+                        Recent
+                    </button>
+                    <button class="filter-tab" data-filter="categories">
+                        <i class="fas fa-tags"></i>
+                        Categories
+                    </button>
+                </div>
+
+                <div id="notesContainer" class="notes-container">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading notes...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note Editor View -->
+            <div id="noteEditorView" class="view">
+                <div class="editor-header">
+                    <button id="backBtn" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </button>
+                    <div class="editor-actions">
+                        <button id="saveBtn" class="save-btn">
+                            <i class="fas fa-save"></i>
+                            Save
+                        </button>
+                        <button id="deleteBtn" class="delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="editor-form">
+                    <div class="form-group">
+                        <input type="text" id="noteTitle" class="note-title" placeholder="Note title..." maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <select id="noteCategory" class="note-category">
+                            <option value="Personal">Personal</option>
+                            <option value="Work">Work</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Ideas">Ideas</option>
+                            <option value="Reminders">Reminders</option>
+                            <option value="Important">Important</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="noteContent" class="note-content" placeholder="Start typing your note..." maxlength="2000"></textarea>
+                    </div>
+
+                    <div class="note-info">
+                        <span id="charCount" class="char-count">0 / 2000</span>
+                        <span id="noteTimestamp" class="note-timestamp"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories View -->
+            <div id="categoriesView" class="view">
+                <div class="categories-header">
+                    <h3>Categories</h3>
+                    <button id="backToCategoriesBtn" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </button>
+                </div>
+
+                <div id="categoriesContainer" class="categories-container">
+                    <!-- Categories will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

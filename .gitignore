@@ -1,0 +1,49 @@
+# FiveM specific
+*.log
+*.cache
+
+# Third-party dependencies (not our code)
+ox_inventory/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# IDE files
+.idea/
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build and distribution artifacts
+build/
+dist/
+
+# Personal development notes (optional - you may want these public)
+*.md
+!README.md
+!LB_PHONE_SETUP.md

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Cards</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-address-card"></i>
+                <span>Business Cards</span>
+            </div>
+            <div class="header-right">
+                <button id="closeBtn" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="cards">
+                    <i class="fas fa-address-card"></i>
+                    My Cards
+                </button>
+                <button class="tab-btn" data-tab="create">
+                    <i class="fas fa-plus"></i>
+                    Create Card
+                </button>
+                <button class="tab-btn" data-tab="share">
+                    <i class="fas fa-share"></i>
+                    Share
+                </button>
+            </div>
+
+            <!-- My Cards Tab -->
+            <div id="cards-tab" class="tab-content active">
+                <div class="card-list">
+                    <h3>My Business Cards</h3>
+                    <div id="cardsList" class="cards-container">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading cards...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Card Tab -->
+            <div id="create-tab" class="tab-content">
+                <div class="form-section">
+                    <h3>Create New Business Card</h3>
+                    
+                    <div class="form-group">
+                        <label for="cardTitle">Card Title *</label>
+                        <input type="text" id="cardTitle" placeholder="e.g., John Smith - CEO" maxlength="50">
+                        <div class="char-count">0/50</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jobTitle">Job Title</label>
+                        <input type="text" id="jobTitle" placeholder="e.g., Chief Executive Officer">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardDescription">Description *</label>
+                        <textarea id="cardDescription" placeholder="Brief description of your business or services..." maxlength="200"></textarea>
+                        <div class="char-count">0/200</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardPhone">Phone Number</label>
+                        <input type="text" id="cardPhone" placeholder="Your contact phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardEmail">Email (Optional)</label>
+                        <input type="email" id="cardEmail" placeholder="your.email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cardTemplate">Template</label>
+                        <select id="cardTemplate">
+                            <option value="Professional">Professional</option>
+                            <option value="Modern">Modern</option>
+                            <option value="Creative">Creative</option>
+                            <option value="Minimal">Minimal</option>
+                            <option value="Corporate">Corporate</option>
+                        </select>
+                    </div>
+
+                    <div class="card-preview">
+                        <h4>Preview</h4>
+                        <div id="cardPreview" class="business-card professional">
+                            <div class="card-header">
+                                <div class="card-title">Your Name</div>
+                                <div class="card-job">Your Job Title</div>
+                            </div>
+                            <div class="card-description">
+                                Your description will appear here...
+                            </div>
+                            <div class="card-contact">
+                                <div class="contact-info">
+                                    <i class="fas fa-phone"></i>
+                                    <span class="phone">Your Phone</span>
+                                </div>
+                                <div class="contact-info">
+                                    <i class="fas fa-envelope"></i>
+                                    <span class="email">Your Email</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="createCard" class="btn-primary" disabled>
+                        <i class="fas fa-plus"></i>
+                        Create Business Card
+                    </button>
+                </div>
+            </div>
+
+            <!-- Share Tab -->
+            <div id="share-tab" class="tab-content">
+                <div class="share-section">
+                    <h3>Share Business Cards</h3>
+                    
+                    <div class="my-cards-for-sharing">
+                        <h4>Select a card to share:</h4>
+                        <div id="shareCardsList" class="share-cards-container">
+                        </div>
+                    </div>
+
+                    <div class="nearby-players">
+                        <h4>Nearby Players:</h4>
+                        <button id="refreshNearby" class="btn-secondary">
+                            <i class="fas fa-sync"></i>
+                            Refresh
+                        </button>
+                        <div id="nearbyPlayersList" class="nearby-list">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

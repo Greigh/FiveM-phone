@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-images"></i>
+                <span>Gallery</span>
+            </div>
+            <div class="header-right">
+                <button id="searchBtn" class="icon-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="uploadBtn" class="icon-btn">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="closeBtn" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div id="searchBar" class="search-bar hidden">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search photos...">
+                <button id="clearSearch" class="clear-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="photos">
+                    <i class="fas fa-images"></i>
+                    <span>Photos</span>
+                </button>
+                <button class="tab-btn" data-tab="albums">
+                    <i class="fas fa-folder"></i>
+                    <span>Albums</span>
+                </button>
+                <button class="tab-btn" data-tab="shared">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Shared</span>
+                </button>
+            </div>
+
+            <!-- Photos Tab -->
+            <div id="photos-tab" class="tab-content active">
+                <div class="photo-grid" id="photoGrid">
+                    <!-- Photos will be loaded here -->
+                </div>
+                <div class="empty-state" id="emptyPhotos">
+                    <i class="fas fa-images"></i>
+                    <h3>No Photos Yet</h3>
+                    <p>Upload your first photo to get started</p>
+                    <button class="btn-primary" onclick="uploadPhoto()">
+                        <i class="fas fa-plus"></i>
+                        Upload Photo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Albums Tab -->
+            <div id="albums-tab" class="tab-content">
+                <div class="albums-grid" id="albumsGrid">
+                    <!-- Albums will be loaded here -->
+                </div>
+                <div class="empty-state" id="emptyAlbums">
+                    <i class="fas fa-folder"></i>
+                    <h3>No Albums Yet</h3>
+                    <p>Create your first album to organize photos</p>
+                    <button class="btn-primary" onclick="createAlbum()">
+                        <i class="fas fa-plus"></i>
+                        Create Album
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shared Tab -->
+            <div id="shared-tab" class="tab-content">
+                <div class="shared-grid" id="sharedGrid">
+                    <!-- Shared photos will be loaded here -->
+                </div>
+                <div class="empty-state" id="emptyShared">
+                    <i class="fas fa-share-alt"></i>
+                    <h3>No Shared Photos</h3>
+                    <p>Photos shared with you will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Upload Modal -->
+    <div id="uploadModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Photo</h3>
+                <button class="close-modal" onclick="closeUploadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload or drag & drop</p>
+                    <input type="file" id="photoInput" accept="image/*" multiple>
+                </div>
+                <div class="upload-options">
+                    <div class="form-group">
+                        <label for="photoTitle">Title (optional)</label>
+                        <input type="text" id="photoTitle" placeholder="Enter photo title">
+                    </div>
+                    <div class="form-group">
+                        <label for="photoAlbum">Album</label>
+                        <select id="photoAlbum">
+                            <option value="">No Album</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="photoPrivate">
+                            Keep photo private
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+                <button class="btn-primary" onclick="uploadPhotos()">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Album Creation Modal -->
+    <div id="albumModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Album</h3>
+                <button class="close-modal" onclick="closeAlbumModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="albumName">Album Name</label>
+                    <input type="text" id="albumName" placeholder="Enter album name" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="albumDescription">Description (optional)</label>
+                    <textarea id="albumDescription" placeholder="Enter album description" maxlength="200"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="albumPrivate">
+                        Keep album private
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeAlbumModal()">Cancel</button>
+                <button class="btn-primary" onclick="createNewAlbum()">Create Album</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Viewer Modal -->
+    <div id="photoModal" class="modal photo-modal hidden">
+        <div class="photo-modal-content">
+            <div class="photo-viewer">
+                <button class="photo-nav prev" onclick="previousPhoto()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <img id="photoDisplay" src="" alt="Photo">
+                <button class="photo-nav next" onclick="nextPhoto()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="photo-info">
+                <div class="photo-details">
+                    <h4 id="photoTitle"></h4>
+                    <p id="photoDate"></p>
+                </div>
+                <div class="photo-actions">
+                    <button class="action-btn" onclick="sharePhoto()">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="action-btn" onclick="deletePhoto()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="action-btn" onclick="closePhotoModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

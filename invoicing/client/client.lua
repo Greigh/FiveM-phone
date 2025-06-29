@@ -7,7 +7,7 @@ local playerData = {}
 
 -- Initialize framework and phone integration
 CreateThread(function()
-  Wait(2000)   -- Wait for resources to load
+  Wait(2000) -- Wait for resources to load
 
   -- Register app with phone system
   PhoneApps.RegisterApp(Config.PhoneApp)
@@ -155,9 +155,9 @@ end)
 
 -- Handle business invoice notifications
 RegisterNetEvent('invoicing:client:receiveBusinessInvoice', function(invoice)
-  local message = string.format("Business invoice for $%s from %s", 
+  local message = string.format("Business invoice for $%s from %s",
     invoice.amount, invoice.sender_business_name or invoice.sender_name)
-  
+
   PhoneApps.ShowNotification(message, "primary", 5000)
   PhoneApps.SendPhoneNotification("invoicing", "Business Invoice", message, 5000)
 end)

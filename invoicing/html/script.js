@@ -20,9 +20,20 @@ const searchResults = document.getElementById('searchResults');
 const amountInput = document.getElementById('amount');
 const descriptionInput = document.getElementById('description');
 const taxRateInput = document.getElementById('taxRate');
+const taxExemptInput = document.getElementById('taxExempt');
 const dueDateInput = document.getElementById('dueDate');
 const notesInput = document.getElementById('notes');
 const sendInvoiceBtn = document.getElementById('sendInvoice');
+
+// Commission elements
+const enableCommissionInput = document.getElementById('enableCommission');
+const commissionOptions = document.getElementById('commissionOptions');
+const commissionTypeSelect = document.getElementById('commissionType');
+const commissionValueInput = document.getElementById('commissionValue');
+const commissionRecipientSelect = document.getElementById('commissionRecipient');
+const customRecipientSearch = document.getElementById('customRecipientSearch');
+const customCommissionRecipientInput = document.getElementById('customCommissionRecipient');
+const commissionSearchResults = document.getElementById('commissionSearchResults');
 
 // Business elements
 const createBusinessBtn = document.getElementById('createBusinessBtn');
@@ -32,7 +43,17 @@ const businessesList = document.getElementById('businessesList');
 // Preview elements
 const subtotalSpan = document.getElementById('subtotal');
 const taxAmountSpan = document.getElementById('taxAmount');
+const taxRateDisplay = document.getElementById('taxRateDisplay');
+const taxPreviewRow = document.getElementById('taxPreviewRow');
+const commissionAmountSpan = document.getElementById('commissionAmount');
+const commissionDisplay = document.getElementById('commissionDisplay');
+const commissionUnit = document.getElementById('commissionUnit');
+const commissionPreviewRow = document.getElementById('commissionPreviewRow');
 const totalSpan = document.getElementById('total');
+const netAmountSpan = document.getElementById('netAmount');
+
+// Commission variables
+let selectedCommissionRecipient = null;
 
 // Initialize app
 window.addEventListener('message', function(event) {
@@ -50,6 +71,7 @@ function openApp() {
     loadInvoices();
     loadBusinesses();
     setupEventListeners();
+    setupCommissionEventListeners();
     updatePreview();
     updateTaxRate();
     updateMaxAmount();
@@ -93,10 +115,14 @@ function setupEventListeners() {
     // Business creation
     createBusinessBtn.addEventListener('click', openBusinessModal);
     
+    // Commission and tax event listeners
+    setupCommissionEventListeners();
+    
     // Click outside search results
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-container')) {
             hideSearchResults();
+            hideCommissionSearchResults();
         }
     });
 }
@@ -188,13 +214,45 @@ function hideSearchResults() {
 
 function updatePreview() {
     const amount = parseFloat(amountInput.value) || 0;
-    const taxRate = parseFloat(taxRateInput.value) / 100 || 0;
+    const taxRate = taxExemptInput.checked ? 0 : (parseFloat(taxRateInput.value) / 100 || 0);
     const taxAmount = amount * taxRate;
-    const total = amount + taxAmount;
     
+    // Commission calculation
+    let commissionAmount = 0;
+    if (enableCommissionInput.checked && commissionValueInput.value) {
+        const commissionValue = parseFloat(commissionValueInput.value) || 0;
+        const commissionType = commissionTypeSelect.value;
+        
+        if (commissionType === 'percentage') {
+            commissionAmount = amount * (commissionValue / 100);
+        } else {
+            commissionAmount = commissionValue;
+        }
+        
+        // Update commission display
+        commissionDisplay.textContent = commissionValue;
+        commissionAmountSpan.textContent = `$${commissionAmount.toFixed(2)}`;
+        commissionPreviewRow.classList.remove('hidden');
+    } else {
+        commissionPreviewRow.classList.add('hidden');
+    }
+    
+    const totalAmount = amount + taxAmount;
+    const netAmount = amount - commissionAmount; // Amount recipient gets after commission
+    
+    // Update displays
     subtotalSpan.textContent = `$${amount.toFixed(2)}`;
+    taxRateDisplay.textContent = (taxRate * 100).toFixed(1);
     taxAmountSpan.textContent = `$${taxAmount.toFixed(2)}`;
-    totalSpan.textContent = `$${total.toFixed(2)}`;
+    totalSpan.textContent = `$${totalAmount.toFixed(2)}`;
+    netAmountSpan.textContent = `$${netAmount.toFixed(2)}`;
+    
+    // Handle tax exempt styling
+    if (taxExemptInput.checked) {
+        taxPreviewRow.classList.add('tax-exempt');
+    } else {
+        taxPreviewRow.classList.remove('tax-exempt');
+    }
     
     updateSendButton();
 }
@@ -212,7 +270,7 @@ function sendInvoice() {
     const recipientType = recipientTypeSelect.value;
     const amount = parseFloat(amountInput.value);
     const description = descriptionInput.value.trim();
-    const taxRate = parseFloat(taxRateInput.value) / 100;
+    const taxRate = taxExemptInput.checked ? 0 : (parseFloat(taxRateInput.value) / 100);
     const dueDate = dueDateInput.value;
     const notes = notesInput.value.trim();
     
@@ -226,6 +284,7 @@ function sendInvoice() {
         amount: amount,
         description: description,
         tax_rate: taxRate,
+        tax_exempt: taxExemptInput.checked,
         sender_type: senderType,
         receiver_type: recipientType
     };
@@ -238,6 +297,24 @@ function sendInvoice() {
             return;
         }
         invoiceData.sender_business_id = parseInt(businessId);
+    }
+
+    // Add commission information if enabled
+    if (enableCommissionInput.checked && commissionValueInput.value) {
+        const commissionValue = parseFloat(commissionValueInput.value);
+        const commissionType = commissionTypeSelect.value;
+        
+        if (!selectedCommissionRecipient) {
+            alert('Please select a commission recipient');
+            return;
+        }
+        
+        invoiceData.commission_enabled = true;
+        invoiceData.commission_type = commissionType;
+        invoiceData.commission_value = commissionValue;
+        invoiceData.commission_recipient_id = selectedCommissionRecipient.citizenid;
+        invoiceData.commission_recipient_name = selectedCommissionRecipient.name;
+        invoiceData.commission_recipient_type = selectedCommissionRecipient.type || 'player';
     }
 
     // Add optional fields
@@ -448,7 +525,10 @@ function createBusiness() {
         business_type: document.getElementById('businessType').value,
         phone: document.getElementById('businessPhone').value.trim(),
         email: document.getElementById('businessEmail').value.trim(),
-        address: document.getElementById('businessAddress').value.trim()
+        address: document.getElementById('businessAddress').value.trim(),
+        default_commission_rate: parseFloat(document.getElementById('defaultCommissionRate').value) / 100,
+        auto_tax_payment: document.getElementById('autoTaxPayment').checked,
+        tax_exempt: document.getElementById('taxExemptBusiness').checked
     };
 
     if (!businessData.name || businessData.name.length < 3) {
@@ -512,10 +592,18 @@ function createBusinessElement(business) {
     const div = document.createElement('div');
     div.className = 'business-item';
     
+    let badges = '';
+    if (business.tax_exempt) {
+        badges += '<span class="tax-exempt-badge">Tax Exempt</span> ';
+    }
+    if (business.default_commission_rate > 0) {
+        badges += `<span class="commission-badge">${(business.default_commission_rate * 100).toFixed(1)}% Commission</span>`;
+    }
+    
     div.innerHTML = `
         <div class="business-header">
             <div class="business-info">
-                <h4>${business.name}</h4>
+                <h4>${business.name} ${badges}</h4>
                 <p><i class="fas fa-tag"></i> ${business.business_type}</p>
                 <p><i class="fas fa-calendar"></i> Created ${formatDate(business.created_at)}</p>
             </div>
@@ -527,6 +615,11 @@ function createBusinessElement(business) {
             ${business.phone ? `<p><i class="fas fa-phone"></i> ${business.phone}</p>` : ''}
             ${business.email ? `<p><i class="fas fa-envelope"></i> ${business.email}</p>` : ''}
             ${business.address ? `<p><i class="fas fa-map-marker-alt"></i> ${business.address}</p>` : ''}
+        </div>
+        <div class="commission-info">
+            <p><i class="fas fa-percentage"></i> Default Commission: ${(business.default_commission_rate * 100).toFixed(1)}%</p>
+            <p><i class="fas fa-coins"></i> Auto Tax Payment: ${business.auto_tax_payment ? 'Yes' : 'No'}</p>
+            ${business.tax_exempt ? '<p><i class="fas fa-shield-alt"></i> Tax Exempt Status</p>' : ''}
         </div>
         <div class="business-actions">
             <button class="btn-secondary" onclick="editBusiness(${business.id})">
@@ -609,4 +702,116 @@ function updateMaxAmount() {
         (config.MaxInvoiceAmount || 50000);
     
     amountInput.max = maxAmount;
+}
+
+// Commission and Tax Functions
+function setupCommissionEventListeners() {
+    enableCommissionInput.addEventListener('change', toggleCommissionOptions);
+    commissionTypeSelect.addEventListener('change', updateCommissionDisplay);
+    commissionValueInput.addEventListener('input', updatePreview);
+    commissionRecipientSelect.addEventListener('change', handleCommissionRecipientChange);
+    taxExemptInput.addEventListener('change', updatePreview);
+    customCommissionRecipientInput.addEventListener('input', handleCommissionRecipientSearch);
+}
+
+function toggleCommissionOptions() {
+    if (enableCommissionInput.checked) {
+        commissionOptions.classList.remove('hidden');
+        // Set default commission value if empty
+        if (!commissionValueInput.value) {
+            commissionValueInput.value = config.DefaultCommissionRate * 100 || 5;
+        }
+    } else {
+        commissionOptions.classList.add('hidden');
+        selectedCommissionRecipient = null;
+    }
+    updatePreview();
+}
+
+function updateCommissionDisplay() {
+    const type = commissionTypeSelect.value;
+    commissionUnit.textContent = type === 'percentage' ? '%' : '';
+    updatePreview();
+}
+
+function handleCommissionRecipientChange() {
+    const selected = commissionRecipientSelect.value;
+    
+    if (selected === 'custom') {
+        customRecipientSearch.classList.remove('hidden');
+        selectedCommissionRecipient = null;
+    } else {
+        customRecipientSearch.classList.add('hidden');
+        
+        if (selected === 'government') {
+            selectedCommissionRecipient = {
+                citizenid: 'GOV001',
+                name: 'Government Tax Authority',
+                type: 'government'
+            };
+            commissionValueInput.value = 3;
+        } else if (selected === 'broker') {
+            selectedCommissionRecipient = {
+                citizenid: 'BROKER001',
+                name: 'Business Broker',
+                type: 'business'
+            };
+            commissionValueInput.value = 2;
+        } else {
+            selectedCommissionRecipient = null;
+        }
+    }
+    updatePreview();
+}
+
+function handleCommissionRecipientSearch() {
+    const query = customCommissionRecipientInput.value.trim();
+    
+    if (query.length < 2) {
+        hideCommissionSearchResults();
+        selectedCommissionRecipient = null;
+        return;
+    }
+    
+    // Search for players/businesses for commission
+    fetch(`https://${GetParentResourceName()}/searchCommissionRecipients`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(recipients => {
+        displayCommissionSearchResults(recipients);
+    });
+}
+
+function displayCommissionSearchResults(recipients) {
+    if (recipients.length === 0) {
+        commissionSearchResults.innerHTML = '<div class="search-result">No recipients found</div>';
+        commissionSearchResults.classList.remove('hidden');
+        return;
+    }
+    
+    commissionSearchResults.innerHTML = '';
+    commissionSearchResults.classList.remove('hidden');
+    
+    recipients.forEach(recipient => {
+        const div = document.createElement('div');
+        div.className = 'search-result';
+        div.innerHTML = `<strong>${recipient.name}</strong><br><small>${recipient.type}</small>`;
+        div.onclick = () => selectCommissionRecipient(recipient);
+        commissionSearchResults.appendChild(div);
+    });
+}
+
+function selectCommissionRecipient(recipient) {
+    selectedCommissionRecipient = recipient;
+    customCommissionRecipientInput.value = recipient.name;
+    hideCommissionSearchResults();
+}
+
+function hideCommissionSearchResults() {
+    commissionSearchResults.classList.add('hidden');
 }

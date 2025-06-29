@@ -89,7 +89,58 @@
 
                     <div class="form-group">
                         <label for="taxRate">Tax Rate (%)</label>
-                        <input type="number" id="taxRate" value="10" min="0" max="25" step="0.1">
+                        <div class="tax-options">
+                            <input type="number" id="taxRate" value="10" min="0" max="25" step="0.1">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="taxExempt">
+                                <span>Tax Exempt</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group commission-section">
+                        <label>Commission Settings</label>
+                        <div class="commission-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableCommission">
+                                <span>Add Commission</span>
+                            </label>
+                        </div>
+                        
+                        <div id="commissionOptions" class="commission-options hidden">
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label for="commissionType">Commission Type</label>
+                                    <select id="commissionType">
+                                        <option value="percentage">Percentage</option>
+                                        <option value="flat">Flat Amount</option>
+                                    </select>
+                                </div>
+                                <div class="form-col">
+                                    <label for="commissionValue">Commission Value</label>
+                                    <input type="number" id="commissionValue" placeholder="5" min="0" step="0.01">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="commissionRecipient">Commission Recipient</label>
+                                <div class="commission-recipient-container">
+                                    <select id="commissionRecipient">
+                                        <option value="">Select recipient...</option>
+                                        <option value="government">Government (3%)</option>
+                                        <option value="broker">Business Broker (2%)</option>
+                                        <option value="custom">Custom Recipient</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="customRecipientSearch" class="hidden">
+                                    <div class="search-container">
+                                        <input type="text" id="customCommissionRecipient" placeholder="Search for commission recipient..." autocomplete="off">
+                                        <div id="commissionSearchResults" class="search-results hidden"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -107,13 +158,21 @@
                             <span>Subtotal:</span>
                             <span id="subtotal">$0.00</span>
                         </div>
-                        <div class="preview-row">
-                            <span>Tax:</span>
+                        <div class="preview-row" id="taxPreviewRow">
+                            <span>Tax (<span id="taxRateDisplay">10</span>%):</span>
                             <span id="taxAmount">$0.00</span>
                         </div>
+                        <div class="preview-row commission-preview hidden" id="commissionPreviewRow">
+                            <span>Commission (<span id="commissionDisplay">0</span><span id="commissionUnit">%</span>):</span>
+                            <span id="commissionAmount">$0.00</span>
+                        </div>
                         <div class="preview-row total">
-                            <span>Total:</span>
+                            <span>Total Amount:</span>
                             <span id="total">$0.00</span>
+                        </div>
+                        <div class="preview-row net-amount">
+                            <span>Net to Recipient:</span>
+                            <span id="netAmount">$0.00</span>
                         </div>
                     </div>
 
@@ -201,6 +260,25 @@
                 <div class="form-group">
                     <label for="businessAddress">Address</label>
                     <textarea id="businessAddress" placeholder="Enter business address" rows="2"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="defaultCommissionRate">Default Commission Rate (%)</label>
+                    <input type="number" id="defaultCommissionRate" value="5" min="0" max="15" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoTaxPayment" checked>
+                        <span>Automatically pay taxes</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="taxExemptBusiness">
+                        <span>Tax exempt business</span>
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">

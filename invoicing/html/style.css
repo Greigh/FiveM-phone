@@ -545,6 +545,174 @@ body {
     color: #721c24;
 }
 
+/* Commission and Tax Styles */
+.tax-options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tax-options input[type="number"] {
+    flex: 1;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+    cursor: pointer;
+    color: #666;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    margin: 0;
+}
+
+.commission-section {
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.commission-toggle {
+    margin-bottom: 15px;
+}
+
+.commission-options {
+    transition: all 0.3s ease;
+}
+
+.commission-options.hidden {
+    display: none;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+.form-col label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-col input,
+.form-col select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.commission-recipient-container {
+    margin-bottom: 10px;
+}
+
+.commission-preview {
+    color: #9b59b6;
+}
+
+.preview-row.net-amount {
+    border-top: 2px solid #e1e8ed;
+    padding-top: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #e67e22;
+}
+
+.preview-row.total {
+    color: #2ecc71;
+    border-top: none;
+    margin-bottom: 5px;
+}
+
+/* Tax exempt styling */
+.tax-exempt .preview-row:nth-child(2) {
+    text-decoration: line-through;
+    color: #95a5a6;
+}
+
+.tax-exempt::after {
+    content: " (EXEMPT)";
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Commission search results */
+#commissionSearchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+#commissionSearchResults .search-result {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+#commissionSearchResults .search-result:hover {
+    background: #f8f9fa;
+}
+
+#commissionSearchResults .search-result:last-child {
+    border-bottom: none;
+}
+
+/* Enhanced business item for commission settings */
+.business-item .commission-info {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.business-item .commission-info p {
+    color: #7f8c8d;
+    font-size: 13px;
+    margin: 3px 0;
+}
+
+.commission-badge {
+    background: #9b59b6;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tax-exempt-badge {
+    background: #e74c3c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {

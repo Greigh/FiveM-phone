@@ -2,6 +2,7 @@
 let playerData = {};
 let config = {};
 let selectedRecipient = null;
+let playerBusinesses = [];
 
 // DOM Elements
 const app = document.getElementById('app');
@@ -10,12 +11,23 @@ const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
 // Form elements
+const senderTypeSelect = document.getElementById('senderType');
+const businessSenderGroup = document.getElementById('businessSenderGroup');
+const senderBusinessSelect = document.getElementById('senderBusiness');
 const recipientInput = document.getElementById('recipient');
+const recipientTypeSelect = document.getElementById('recipientType');
 const searchResults = document.getElementById('searchResults');
 const amountInput = document.getElementById('amount');
 const descriptionInput = document.getElementById('description');
 const taxRateInput = document.getElementById('taxRate');
+const dueDateInput = document.getElementById('dueDate');
+const notesInput = document.getElementById('notes');
 const sendInvoiceBtn = document.getElementById('sendInvoice');
+
+// Business elements
+const createBusinessBtn = document.getElementById('createBusinessBtn');
+const businessModal = document.getElementById('businessModal');
+const businessesList = document.getElementById('businessesList');
 
 // Preview elements
 const subtotalSpan = document.getElementById('subtotal');
@@ -36,8 +48,11 @@ window.addEventListener('message', function(event) {
 function openApp() {
     app.classList.remove('hidden');
     loadInvoices();
+    loadBusinesses();
     setupEventListeners();
     updatePreview();
+    updateTaxRate();
+    updateMaxAmount();
 }
 
 function closeApp() {
@@ -66,12 +81,17 @@ function setupEventListeners() {
     });
     
     // Form inputs
+    senderTypeSelect.addEventListener('change', handleSenderTypeChange);
     recipientInput.addEventListener('input', handleRecipientSearch);
+    recipientTypeSelect.addEventListener('change', updateRecipientSearch);
     amountInput.addEventListener('input', updatePreview);
     taxRateInput.addEventListener('input', updatePreview);
     
     // Send invoice
     sendInvoiceBtn.addEventListener('click', sendInvoice);
+    
+    // Business creation
+    createBusinessBtn.addEventListener('click', openBusinessModal);
     
     // Click outside search results
     document.addEventListener('click', (e) => {
@@ -101,6 +121,8 @@ function switchTab(tabName) {
     // Load data for specific tabs
     if (tabName === 'received' || tabName === 'sent') {
         loadInvoices();
+    } else if (tabName === 'businesses') {
+        loadBusinesses();
     }
 }
 
@@ -186,20 +208,45 @@ function updateSendButton() {
 }
 
 function sendInvoice() {
+    const senderType = senderTypeSelect.value;
+    const recipientType = recipientTypeSelect.value;
     const amount = parseFloat(amountInput.value);
     const description = descriptionInput.value.trim();
     const taxRate = parseFloat(taxRateInput.value) / 100;
+    const dueDate = dueDateInput.value;
+    const notes = notesInput.value.trim();
     
     if (!selectedRecipient || amount <= 0 || !description) {
+        alert('Please fill in all required fields');
         return;
     }
-    
-    const invoiceData = {
+
+    let invoiceData = {
         receiver_citizenid: selectedRecipient.citizenid,
         amount: amount,
         description: description,
-        tax_rate: taxRate
+        tax_rate: taxRate,
+        sender_type: senderType,
+        receiver_type: recipientType
     };
+
+    // Add business information if sending from business
+    if (senderType === 'business') {
+        const businessId = senderBusinessSelect.value;
+        if (!businessId) {
+            alert('Please select a business to send from');
+            return;
+        }
+        invoiceData.sender_business_id = parseInt(businessId);
+    }
+
+    // Add optional fields
+    if (dueDate) {
+        invoiceData.due_date = dueDate;
+    }
+    if (notes) {
+        invoiceData.notes = notes;
+    }
     
     fetch(`https://${GetParentResourceName()}/sendInvoice`, {
         method: 'POST',
@@ -207,10 +254,14 @@ function sendInvoice() {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(invoiceData)
-    }).then(() => {
-        clearForm();
-        // Switch to sent tab to see the new invoice
-        switchTab('sent');
+    }).then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            clearForm();
+            switchTab('sent');
+        } else {
+            alert(result.message || 'Failed to send invoice');
+        }
     });
 }
 
@@ -372,3 +423,190 @@ document.addEventListener('DOMContentLoaded', function() {
     taxRateInput.value = 10; // Default 10%
     updatePreview();
 });
+
+// Business functions
+function openBusinessModal() {
+    businessModal.classList.remove('hidden');
+}
+
+function closeBusinessModal() {
+    businessModal.classList.add('hidden');
+    clearBusinessForm();
+}
+
+function clearBusinessForm() {
+    document.getElementById('businessName').value = '';
+    document.getElementById('businessType').value = 'retail';
+    document.getElementById('businessPhone').value = '';
+    document.getElementById('businessEmail').value = '';
+    document.getElementById('businessAddress').value = '';
+}
+
+function createBusiness() {
+    const businessData = {
+        name: document.getElementById('businessName').value.trim(),
+        business_type: document.getElementById('businessType').value,
+        phone: document.getElementById('businessPhone').value.trim(),
+        email: document.getElementById('businessEmail').value.trim(),
+        address: document.getElementById('businessAddress').value.trim()
+    };
+
+    if (!businessData.name || businessData.name.length < 3) {
+        alert('Business name must be at least 3 characters long');
+        return;
+    }
+
+    fetch(`https://${GetParentResourceName()}/createBusiness`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(businessData)
+    }).then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            closeBusinessModal();
+            loadBusinesses();
+        } else {
+            alert(result.message || 'Failed to create business');
+        }
+    });
+}
+
+function loadBusinesses() {
+    fetch(`https://${GetParentResourceName()}/getBusinesses`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(businesses => {
+        playerBusinesses = businesses;
+        displayBusinesses(businesses);
+        updateBusinessDropdown(businesses);
+    });
+}
+
+function displayBusinesses(businesses) {
+    if (businesses.length === 0) {
+        businessesList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-building"></i>
+                <h4>No Businesses Yet</h4>
+                <p>Create your first business to start sending business invoices</p>
+            </div>
+        `;
+        return;
+    }
+
+    businessesList.innerHTML = '';
+    businesses.forEach(business => {
+        const businessElement = createBusinessElement(business);
+        businessesList.appendChild(businessElement);
+    });
+}
+
+function createBusinessElement(business) {
+    const div = document.createElement('div');
+    div.className = 'business-item';
+    
+    div.innerHTML = `
+        <div class="business-header">
+            <div class="business-info">
+                <h4>${business.name}</h4>
+                <p><i class="fas fa-tag"></i> ${business.business_type}</p>
+                <p><i class="fas fa-calendar"></i> Created ${formatDate(business.created_at)}</p>
+            </div>
+            <div class="business-status">
+                <span class="status ${business.status}">${business.status}</span>
+            </div>
+        </div>
+        <div class="business-details">
+            ${business.phone ? `<p><i class="fas fa-phone"></i> ${business.phone}</p>` : ''}
+            ${business.email ? `<p><i class="fas fa-envelope"></i> ${business.email}</p>` : ''}
+            ${business.address ? `<p><i class="fas fa-map-marker-alt"></i> ${business.address}</p>` : ''}
+        </div>
+        <div class="business-actions">
+            <button class="btn-secondary" onclick="editBusiness(${business.id})">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn-danger" onclick="deleteBusiness(${business.id})">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    `;
+    
+    return div;
+}
+
+function updateBusinessDropdown(businesses) {
+    senderBusinessSelect.innerHTML = '<option value="">Select a business...</option>';
+    businesses.forEach(business => {
+        const option = document.createElement('option');
+        option.value = business.id;
+        option.textContent = business.name;
+        senderBusinessSelect.appendChild(option);
+    });
+}
+
+function editBusiness(businessId) {
+    // TODO: Implement business editing
+    console.log('Edit business:', businessId);
+}
+
+function deleteBusiness(businessId) {
+    if (!confirm('Are you sure you want to delete this business?')) {
+        return;
+    }
+
+    fetch(`https://${GetParentResourceName()}/deleteBusiness`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ businessId: businessId })
+    }).then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            loadBusinesses();
+        } else {
+            alert(result.message || 'Failed to delete business');
+        }
+    });
+}
+
+// Update sender type change handler
+function handleSenderTypeChange() {
+    const senderType = senderTypeSelect.value;
+    if (senderType === 'business') {
+        businessSenderGroup.style.display = 'block';
+        if (playerBusinesses.length === 0) {
+            loadBusinesses();
+        }
+    } else {
+        businessSenderGroup.style.display = 'none';
+    }
+    updateTaxRate();
+    updateMaxAmount();
+}
+
+function updateTaxRate() {
+    const senderType = senderTypeSelect.value;
+    if (senderType === 'business' && config.BusinessTaxRate) {
+        taxRateInput.value = (config.BusinessTaxRate * 100).toFixed(1);
+    } else {
+        taxRateInput.value = (config.DefaultTaxRate * 100).toFixed(1);
+    }
+    updatePreview();
+}
+
+function updateMaxAmount() {
+    const senderType = senderTypeSelect.value;
+    const maxAmount = senderType === 'business' ? 
+        (config.MaxBusinessInvoiceAmount || 100000) : 
+        (config.MaxInvoiceAmount || 50000);
+    
+    amountInput.max = maxAmount;
+}

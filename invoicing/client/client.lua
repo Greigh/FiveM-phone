@@ -107,6 +107,38 @@ RegisterNUICallback('searchPlayers', function(data, cb)
   end, data.query)
 end)
 
+-- Get player businesses
+RegisterNUICallback('getBusinesses', function(data, cb)
+  PhoneApps.TriggerCallback('invoicing:server:getBusinesses', function(businesses)
+    cb(businesses)
+  end)
+end)
+
+-- Create business
+RegisterNUICallback('createBusiness', function(data, cb)
+  TriggerServerEvent('invoicing:server:createBusiness', data)
+  cb('ok')
+end)
+
+-- Delete business
+RegisterNUICallback('deleteBusiness', function(data, cb)
+  TriggerServerEvent('invoicing:server:deleteBusiness', data.businessId)
+  cb('ok')
+end)
+
+-- Handle business creation response
+RegisterNetEvent('invoicing:client:businessCreated', function(success, message)
+  if success then
+    PhoneApps.ShowNotification(Config.Notifications.businessCreated, "success")
+    -- Send NUI message to refresh businesses list
+    SendNUIMessage({
+      action = "refreshBusinesses"
+    })
+  else
+    PhoneApps.ShowNotification(message or "Failed to create business", "error")
+  end
+end)
+
 -- Handle invoice notifications
 RegisterNetEvent('invoicing:client:receiveInvoice', function(invoice)
   PhoneApps.ShowNotification("You received an invoice for $" .. invoice.amount .. " from " .. invoice.sender_name,
@@ -119,6 +151,15 @@ end)
 -- Handle payment notifications
 RegisterNetEvent('invoicing:client:invoicePaid', function(invoice)
   PhoneApps.ShowNotification("Invoice #" .. invoice.id .. " has been paid! +$" .. invoice.amount, "success", 5000)
+end)
+
+-- Handle business invoice notifications
+RegisterNetEvent('invoicing:client:receiveBusinessInvoice', function(invoice)
+  local message = string.format("Business invoice for $%s from %s", 
+    invoice.amount, invoice.sender_business_name or invoice.sender_name)
+  
+  PhoneApps.ShowNotification(message, "primary", 5000)
+  PhoneApps.SendPhoneNotification("invoicing", "Business Invoice", message, 5000)
 end)
 
 -- Export for phone integration

@@ -35,6 +35,10 @@
                     <i class="fas fa-paper-plane"></i>
                     Sent
                 </button>
+                <button class="tab-btn" data-tab="businesses">
+                    <i class="fas fa-building"></i>
+                    Businesses
+                </button>
             </div>
 
             <!-- Create Invoice Tab -->
@@ -43,11 +47,34 @@
                     <h3>Create New Invoice</h3>
                     
                     <div class="form-group">
+                        <label for="senderType">Send From</label>
+                        <select id="senderType">
+                            <option value="player">Personal Account</option>
+                            <option value="business">Business Account</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="businessSenderGroup" style="display: none;">
+                        <label for="senderBusiness">Select Business</label>
+                        <select id="senderBusiness">
+                            <option value="">Select a business...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label for="recipient">Recipient</label>
                         <div class="search-container">
                             <input type="text" id="recipient" placeholder="Search for player..." autocomplete="off">
                             <div id="searchResults" class="search-results hidden"></div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipientType">Recipient Type</label>
+                        <select id="recipientType">
+                            <option value="player">Individual</option>
+                            <option value="business">Business</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -63,6 +90,16 @@
                     <div class="form-group">
                         <label for="taxRate">Tax Rate (%)</label>
                         <input type="number" id="taxRate" value="10" min="0" max="25" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dueDate">Due Date (Optional)</label>
+                        <input type="date" id="dueDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Notes (Optional)</label>
+                        <textarea id="notes" placeholder="Additional notes..." rows="2"></textarea>
                     </div>
 
                     <div class="invoice-preview">
@@ -105,6 +142,70 @@
                         <!-- Invoices will be populated here -->
                     </div>
                 </div>
+            </div>
+
+            <!-- Businesses Tab -->
+            <div id="businesses-tab" class="tab-content">
+                <div class="business-section">
+                    <div class="business-header">
+                        <h3>My Businesses</h3>
+                        <button id="createBusinessBtn" class="btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            Create Business
+                        </button>
+                    </div>
+                    
+                    <div id="businessesList" class="businesses-container">
+                        <!-- Businesses will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Creation Modal -->
+    <div id="businessModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Business</h3>
+                <button class="close-modal" onclick="closeBusinessModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="businessName">Business Name</label>
+                    <input type="text" id="businessName" placeholder="Enter business name" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="businessType">Business Type</label>
+                    <select id="businessType">
+                        <option value="retail">Retail</option>
+                        <option value="service">Service</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="automotive">Automotive</option>
+                        <option value="real_estate">Real Estate</option>
+                        <option value="legal">Legal</option>
+                        <option value="medical">Medical</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="businessPhone">Phone Number</label>
+                    <input type="text" id="businessPhone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="businessEmail">Email</label>
+                    <input type="email" id="businessEmail" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label for="businessAddress">Address</label>
+                    <textarea id="businessAddress" placeholder="Enter business address" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBusinessModal()">Cancel</button>
+                <button class="btn-primary" onclick="createBusiness()">Create Business</button>
             </div>
         </div>
     </div>

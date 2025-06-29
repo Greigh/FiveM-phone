@@ -381,22 +381,168 @@ body {
     gap: 10px;
 }
 
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #7f8c8d;
+/* Business Styles */
+.business-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.empty-state i {
-    font-size: 48px;
+.business-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.business-header h3 {
+    color: #2c3e50;
+    font-size: 20px;
+}
+
+.businesses-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.business-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 4px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.business-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.business-item .business-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 15px;
-    opacity: 0.5;
 }
 
-.empty-state h4 {
-    margin-bottom: 8px;
-    color: #95a5a6;
+.business-info h4 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.business-info p {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.business-status {
+    text-align: right;
+}
+
+.business-details {
+    margin-bottom: 15px;
+}
+
+.business-details p {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.business-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.modal-header h3 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #7f8c8d;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+    background: #f0f0f0;
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 2px solid #f0f0f0;
+}
+
+/* Status badges for businesses */
+.status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.inactive {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.suspended {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 /* Responsive */

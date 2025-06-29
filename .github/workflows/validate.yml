@@ -48,7 +48,7 @@ jobs:
       - name: 🧪 Lua Syntax Check
         run: |
           echo "🔍 Checking Lua syntax..."
-          
+
           # Check which Lua compiler is available
           if command -v luac5.4 >/dev/null 2>&1; then
             LUA_COMPILER="luac5.4"
@@ -58,12 +58,12 @@ jobs:
             echo "⚠️  No Lua compiler found, skipping syntax check"
             exit 0
           fi
-          
+
           echo "Using compiler: $LUA_COMPILER"
-          
+
           # Create temporary error log
           error_log=$(mktemp)
-          
+
           find . -name "*.lua" -type f -print0 | while IFS= read -r -d '' file; do
             echo "Checking: $file"
             # Use luac for basic syntax checking (ignores undefined globals)
@@ -74,7 +74,7 @@ jobs:
               echo "" >> "$error_log"
             fi
           done
-          
+
           # Check if any errors were found
           if [ -s "$error_log" ]; then
             echo "❌ Lua syntax errors found:"
@@ -82,7 +82,7 @@ jobs:
             rm "$error_log"
             exit 1
           fi
-          
+
           rm "$error_log"
           echo "✅ All Lua files have valid syntax"
 

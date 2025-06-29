@@ -44,7 +44,7 @@ jobs:
           cp -r gallery/ release/phone_apps/
           cp install.sh release/phone_apps/
           cp validate_phone_apps.sh release/phone_apps/
-          cp README_STANDALONE.md release/phone_apps/README.md
+          cp README.md release/phone_apps/
           cp LB_PHONE_SETUP.md release/phone_apps/
           cp .luarc.json release/phone_apps/
 

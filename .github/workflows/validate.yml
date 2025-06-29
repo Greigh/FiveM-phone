@@ -37,6 +37,8 @@ jobs:
 
           # Install lua for syntax checking
           sudo apt-get install -y lua5.4
+          # Try to install luac5.4, fallback if not available
+          sudo apt-get install -y luac5.4 || echo "luac5.4 not available, will use alternative"
 
       - name: 🔍 Run Phone Apps Validation
         run: |
@@ -46,13 +48,42 @@ jobs:
       - name: 🧪 Lua Syntax Check
         run: |
           echo "🔍 Checking Lua syntax..."
-          find . -name "*.lua" -type f | while read -r file; do
+          
+          # Check which Lua compiler is available
+          if command -v luac5.4 >/dev/null 2>&1; then
+            LUA_COMPILER="luac5.4"
+          elif command -v luac >/dev/null 2>&1; then
+            LUA_COMPILER="luac"
+          else
+            echo "⚠️  No Lua compiler found, skipping syntax check"
+            exit 0
+          fi
+          
+          echo "Using compiler: $LUA_COMPILER"
+          
+          # Create temporary error log
+          error_log=$(mktemp)
+          
+          find . -name "*.lua" -type f -print0 | while IFS= read -r -d '' file; do
             echo "Checking: $file"
-            if ! lua5.4 -c "$file"; then
+            # Use luac for basic syntax checking (ignores undefined globals)
+            if ! $LUA_COMPILER -p "$file" >/dev/null 2>&1; then
               echo "❌ Syntax error in: $file"
-              exit 1
+              echo "Error in $file:" >> "$error_log"
+              $LUA_COMPILER -p "$file" 2>&1 | head -3 >> "$error_log"
+              echo "" >> "$error_log"
             fi
           done
+          
+          # Check if any errors were found
+          if [ -s "$error_log" ]; then
+            echo "❌ Lua syntax errors found:"
+            cat "$error_log"
+            rm "$error_log"
+            exit 1
+          fi
+          
+          rm "$error_log"
           echo "✅ All Lua files have valid syntax"
 
       - name: 📝 JavaScript/HTML Validation
